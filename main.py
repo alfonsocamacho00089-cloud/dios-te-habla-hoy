@@ -25,7 +25,7 @@ if st.button("Recibir Mensaje"):
                         {"role": "system", "content": "Eres un guía espiritual. Da un versículo bíblico y un mensaje corto de esperanza."},
                         {"role": "user", "content": sentir}
                     ],
-                    model="llama3-8b-8192",
+                    model="llama-3.3-70b-versatile",
                 )
                 st.markdown("---")
                 st.success(chat_completion.choices[0].message.content)
