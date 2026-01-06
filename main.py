@@ -12,8 +12,7 @@ except:
 # 2. Configurar la IA
 try:
     genai.configure(api_key=GEMINI_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-except:
+    model = genai.GenerativeModel('gemini-pro')
     st.error("❌ La llave es incorrecta o no tiene permisos.")
     st.stop()
 
