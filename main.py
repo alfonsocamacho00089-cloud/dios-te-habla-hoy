@@ -1,31 +1,36 @@
 import streamlit as st
-import random
+from groq import Groq
 
-# Configuración visual
-st.set_page_config(page_title="Dios te habla hoy", page_icon="✨")
+st.set_page_config(page_title="Dios habla contigo", page_icon="✨")
 
-st.title("✨ Dios te habla hoy")
-st.write("Escribe lo que sientes y recibe una palabra de aliento.")
+# Conectar con la llave de Groq
+try:
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+except:
+    st.error("Falta la llave GROQ_API_KEY en Secrets.")
+    st.stop()
 
-# Lista de versículos guardados directamente en la app (Sin fallos de internet)
-versiculos = [
-    "La paz les dejo, mi paz les doy. (Juan 14:27)",
-    "El Señor es mi pastor, nada me faltará. (Salmo 23:1)",
-    "Todo lo puedo en Cristo que me fortalece. (Filipenses 4:13)",
-    "No temas, porque yo estoy contigo. (Isaías 41:10)",
-    "Vengan a mí los que están cansados y cargados. (Mateo 11:28)",
-    "Tu palabra es lumbrera a mis pies y luz en mi camino. (Salmo 119:105)"
-]
+st.title("✨ Dios habla contigo")
+st.write("Recibe una palabra de fe impulsada por IA (Gratis).")
 
 sentir = st.text_input("¿Qué hay en tu corazón?")
 
-if st.button("Recibir mensaje"):
+if st.button("Recibir Mensaje"):
     if sentir:
-        # Elegimos un versículo al azar de la lista
-        mensaje = random.choice(versiculos)
-        st.markdown("---")
-        st.success(f"Hijo, sobre tu sentir de '{sentir}', recuerda:")
-        st.info(mensaje)
-        st.balloons()
+        with st.spinner("Buscando una palabra para ti..."):
+            try:
+                # Usamos Llama 3 (la IA de Facebook que es gratis en Groq)
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": "Eres un guía espiritual. Da un versículo bíblico y un mensaje corto de esperanza."},
+                        {"role": "user", "content": sentir}
+                    ],
+                    model="llama3-8b-8192",
+                )
+                st.markdown("---")
+                st.success(chat_completion.choices[0].message.content)
+                st.balloons()
+            except Exception as e:
+                st.error("Error de conexión. Intenta de nuevo.")
     else:
-        st.warning("Escribe algo primero para recibir tu palabra.")
+        st.warning("Escribe algo primero.")
