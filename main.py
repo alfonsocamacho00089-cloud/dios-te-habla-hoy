@@ -47,14 +47,14 @@ with tab1:
         else:
             st.warning("Escribe una emoción.")
 
-# --- PESTAÑA 2: CONSEJERO PROFUNDO ---
+# --- PESTAÑA 2: enseñanza de Dios ---
 with tab2:
     st.subheader("Consejo y Sabiduría")
     problema = st.text_area("¿Qué situación estás pasando?", height=150)
     
-    if st.button("Pedir Consejo"):
+    if st.button("pedir consejo a Dios"):
         if problema:
-            with st.spinner("La IA está reflexionando..."):
+            with st.spinner("Dios te dara la respuesta que biscas..."):
                 chat_completion = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": "Eres un pastor cristiano compasivo. un versículo y una bendición."},
