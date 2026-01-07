@@ -57,7 +57,7 @@ with tab2:
             with st.spinner("La IA está reflexionando..."):
                 chat_completion = client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "Eres un consejero espiritual compasivo. Brinda pasos prácticos, un versículo y una bendición."},
+                        {"role": "system", "content": "Eres un pastor cristiano compasivo. un versículo y una bendición."},
                         {"role": "user", "content": problema}
                     ],
                     model="llama-3.3-70b-versatile",
