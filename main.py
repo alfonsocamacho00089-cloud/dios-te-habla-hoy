@@ -33,7 +33,7 @@ with tab1:
             with st.spinner("Palabra de Dios..."):
                 chat_completion = client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "Eres jesus de Nazareth. Da un versículo bíblico y un mensaje corto de aliento."},
+                        {"role": "system", "content": "Eres jesus de Nazareth. Da un versículo bíblico y un mensaje corto de aliento sobre ese verciculo."},
                         {"role": "user", "content": sentir_corto}
                     ],
                     model="llama-3.3-70b-versatile",
