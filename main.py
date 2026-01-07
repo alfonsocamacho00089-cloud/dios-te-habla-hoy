@@ -21,7 +21,7 @@ except:
 
 st.title("✨ Dios habla contigo")
 
-tab1, tab2 = st.tabs(["Palabra de Aliento", "📖 Consejo de Dios"])
+tab1, tab2 = st.tabs(["📖 Palabra de Aliento", "📖 Consejo de Dios"])
 
 # --- PESTAÑA 1: PALABRA RÁPIDA ---
 with tab1:
@@ -30,10 +30,10 @@ with tab1:
     
     if st.button("Recibir Versículo"):
         if sentir_corto:
-            with st.spinner("Buscando una palabra..."):
+            with st.spinner("Palabra de Dios..."):
                 chat_completion = client.chat.completions.create(
                     messages=[
-                        {"role": "system", "content": "Eres un guía espiritual. Da un versículo bíblico y un mensaje corto de aliento."},
+                        {"role": "system", "content": "Eres jesus de Nazareth. Da un versículo bíblico y un mensaje corto de aliento."},
                         {"role": "user", "content": sentir_corto}
                     ],
                     model="llama-3.3-70b-versatile",
@@ -54,7 +54,7 @@ with tab2:
     
     if st.button("Pedir Consejo a Dios"):
         if problema:
-            with st.spinner("Dios te dara la respuesta que biscas..."):
+            with st.spinner("Dios te dara la respuesta que buscas..."):
                 chat_completion = client.chat.completions.create(
                     messages=[
                         {"role": "system", "content": "Eres un pastor cristiano compasivo. un versículo y una bendición."},
