@@ -1,59 +1,72 @@
 import streamlit as st
 from groq import Groq
 from gtts import gTTS
-import base64
+import os
 
-# Configuración
+# Configuración de la página
 st.set_page_config(page_title="Dios habla contigo", page_icon="✨")
 
-# Función optimizada para audio
-def generar_audio(texto):
-    try:
-        tts = gTTS(text=texto, lang='es')
-        tts.save("temp.mp3")
-        with open("temp.mp3", "rb") as f:
-            data = f.read()
-        return data
-    except:
-        return None
+# Función para convertir texto a voz
+def texto_a_voz(texto):
+    tts = gTTS(text=texto, lang='es')
+    tts.save("respuesta.mp3")
+    return "respuesta.mp3"
 
-# Conexión Groq
+# Conexión con la llave de Groq
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except:
-    st.error("Revisa tu llave en Secrets")
+    st.error("Configura tu GROQ_API_KEY en Secrets.")
     st.stop()
 
 st.title("✨ Dios habla contigo")
 
-tab1, tab2 = st.tabs(["🙏 Palabra", "📖 Consejo"])
+tab1, tab2 = st.tabs(["🙏 Palabra del Día", "📖 Consejero Espiritual"])
 
+# --- PESTAÑA 1: PALABRA RÁPIDA ---
 with tab1:
-    sentir = st.text_input("¿Cómo te sientes?", key="t1")
+    st.subheader("Recibe un mensaje de fe")
+    sentir_corto = st.text_input("¿Cómo te sientes hoy?", key="corto")
+    
     if st.button("Recibir Versículo"):
-        with st.spinner("Generando..."):
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Da un versículo y un mensaje corto."},
-                          {"role": "user", "content": sentir}],
-                model="llama-3.3-70b-versatile"
-            ).choices[0].message.content
-            st.info(res)
-            # Audio
-            audio_data = generar_audio(res)
-            if audio_data:
-                st.audio(audio_data, format="audio/mp3")
+        if sentir_corto:
+            with st.spinner("Buscando una palabra..."):
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": "Eres un guía espiritual. Da un versículo bíblico y un mensaje corto de aliento."},
+                        {"role": "user", "content": sentir_corto}
+                    ],
+                    model="llama-3.3-70b-versatile",
+                )
+                respuesta = chat_completion.choices[0].message.content
+                st.info(respuesta)
+                
+                # Generar Audio
+                audio_file = texto_a_voz(respuesta)
+                st.audio(audio_file, format="audio/mp3")
+        else:
+            st.warning("Escribe una emoción.")
 
+# --- PESTAÑA 2: CONSEJERO PROFUNDO ---
 with tab2:
-    problema = st.text_area("¿Qué te preocupa?", key="t2")
+    st.subheader("Consejo y Sabiduría")
+    problema = st.text_area("¿Qué situación estás pasando?", height=150)
+    
     if st.button("Pedir Consejo"):
-        with st.spinner("Reflexionando..."):
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Eres un consejero espiritual. Da pasos prácticos y fe."},
-                          {"role": "user", "content": problema}],
-                model="llama-3.3-70b-versatile"
-            ).choices[0].message.content
-            st.success(res)
-            # Audio
-            audio_data = generar_audio(res)
-            if audio_data:
-                st.audio(audio_data, format="audio/mp3")
+        if problema:
+            with st.spinner("La IA está reflexionando..."):
+                chat_completion = client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": "Eres un consejero espiritual compasivo. Brinda pasos prácticos, un versículo y una bendición."},
+                        {"role": "user", "content": problema}
+                    ],
+                    model="llama-3.3-70b-versatile",
+                )
+                respuesta_larga = chat_completion.choices[0].message.content
+                st.success(respuesta_larga)
+                
+                # Generar Audio
+                audio_file = texto_a_voz(respuesta_larga)
+                st.audio(audio_file, format="audio/mp3")
+        else:
+            st.warning("Cuéntanos qué te preocupa.")
