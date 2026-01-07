@@ -21,7 +21,7 @@ except:
 
 st.title("✨ Dios habla contigo")
 
-tab1, tab2 = st.tabs(["🙏 Palabra del Día", "📖 Consejero Espiritual"])
+tab1, tab2 = st.tabs(["Palabra de Aliento", "📖 Consejo de Dios"])
 
 # --- PESTAÑA 1: PALABRA RÁPIDA ---
 with tab1:
@@ -47,12 +47,12 @@ with tab1:
         else:
             st.warning("Escribe una emoción.")
 
-# --- PESTAÑA 2: enseñanza de Dios ---
+# --- PESTAÑA 2: Enseñanza de Dios ---
 with tab2:
     st.subheader("Consejo y Sabiduría")
     problema = st.text_area("¿Qué situación estás pasando?", height=150)
     
-    if st.button("pedir consejo a Dios"):
+    if st.button("Pedir Consejo a Dios"):
         if problema:
             with st.spinner("Dios te dara la respuesta que biscas..."):
                 chat_completion = client.chat.completions.create(
