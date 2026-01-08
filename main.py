@@ -144,16 +144,21 @@ elif st.session_state.menu == 'biblia':
     
     if st.button("Abrir Biblia"):
         with st.spinner("Cargando escrituras..."):
-            # Aquí añadimos la instrucción de listar los versículos hacia abajo
+            # Reforzamos la instrucción para que use saltos de línea reales (\n)
             res = client.chat.completions.create(
                 messages=[{"role": "system", "content": f"""Muestra el texto de {libro_sel} {cap} en español Reina Valera 1960. 
-                IMPORTANTE: Escribe cada versículo en una línea nueva, comenzando con su número (ejemplo: 1 En el principio...), para que aparezcan en fila hacia abajo."""}],
+                REGLA ESTRICTA DE FORMATO: 
+                Escribe cada versículo en su propia línea. 
+                DEBES poner un salto de línea doble entre cada versículo para que se vean uno debajo del otro como una lista, así:
+                1 Versículo uno...
+                
+                2 Versículo dos..."""}],
                 model="llama-3.3-70b-versatile"
             ).choices[0].message.content
             
             st.markdown(f"### {libro_sel} {cap}")
-            # Usamos un contenedor con borde para que se vea más organizado
-            st.info(res)
+            # Usamos st.write para que respete mejor los saltos de línea de la IA
+            st.write(res)
 # BOTÓN VOLVER
 if st.session_state.menu != 'inicio':
     if st.button("⬅️ VOLVER AL MENÚ"):
