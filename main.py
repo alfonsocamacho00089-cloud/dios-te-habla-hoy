@@ -103,9 +103,20 @@ elif st.session_state.menu == 'consejo':
 elif st.session_state.menu == 'devocional':
     st.subheader("☀️ Devocional Diario")
     if st.button("Generar Nuevo Devocional"):
-        with st.spinner("Preparando..."):
+        with st.spinner("Preparando alimento basado en la sana doctrina..."):
             res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Crea un devocional con título, versículo, reflexión y oración."}],
+                messages=[{
+                    "role": "system", 
+                    "content": """Eres un mentor bíblico ortodoxo. Crea un devocional con la siguiente estructura estricta:
+                    1. Título inspirador.
+                    2. Versículo clave (Reina Valera 1960).
+                    3. Enseñanza Bíblica: Basada estrictamente en las palabras de Jesús o las epístolas de los apóstoles (priorizando a Pablo). Debe ser una explicación profunda de la sana doctrina.
+                    4. Reflexión para nuestros días: Un párrafo muy corto que conecte la enseñanza con el mundo actual.
+                    5. Aplicación para nuestra vida: Pasos prácticos para vivir esa palabra hoy.
+                    6. Oración breve.
+                    
+                    Importante: No uses la palabra 'Reflexión' para la aplicación. Usa exactamente los títulos mencionados."""
+                }],
                 model="llama-3.3-70b-versatile"
             ).choices[0].message.content
             st.session_state.temp_dev = res
