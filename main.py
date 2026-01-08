@@ -88,7 +88,7 @@ if st.session_state.menu == 'aliento':
 # SECCIÓN: CONSEJO
 elif st.session_state.menu == 'consejo':
     st.subheader("📖 Consejo de Dios")
-    st.write("Cuéntale a Dios tus preocupaciones. La IA te responderá como un pastor compasivo.")
+    st.write("Cuéntale a Dios tus preocupaciones. La IA te responderá como un pastor boblico compasivo y podrás seguir la conversación.")
 
     # 1. Inicializar el historial de esta conversación si no existe
     if 'chat_consejo' not in st.session_state:
@@ -99,20 +99,18 @@ elif st.session_state.menu == 'consejo':
         with st.chat_message(mensaje["role"]):
             st.markdown(mensaje["content"])
 
-    # 3. Caja de texto para que tú escribas
-    prompt = st.chat_input("Escribe aquí lo que hay en tu corazón...")
-    
-    if prompt:
+    # 3. Caja de texto para que tú escribas (donde le vas a pedir el apoyo)
+    if prompt := st.chat_input("Escribe aquí lo que hay en tu corazón..."):
         # Mostrar tu mensaje
         with st.chat_message("user"):
             st.markdown(prompt)
-        
         # Guardarlo en el historial
         st.session_state.chat_consejo.append({"role": "user", "content": prompt})
 
         # Generar la respuesta de la IA
         with st.chat_message("assistant"):
             with st.spinner("Dios tiene una palabra para ti..."):
+                # Enviamos todo el historial para que la IA sepa de qué están hablando
                 mensajes_ia = [
                     {"role": "system", "content": "Eres un pastor cristiano lleno de amor y sabiduría. Tu meta es dar consejo bíblico, apoyo emocional y pasos prácticos. Escucha con paciencia y responde con versículos que den paz."}
                 ] + st.session_state.chat_consejo
@@ -124,14 +122,6 @@ elif st.session_state.menu == 'consejo':
                 
                 st.markdown(res)
                 st.audio(texto_a_voz(res))
-        
-        # Guardar la respuesta de la IA en el historial
-        st.session_state.chat_consejo.append({"role": "assistant", "content": res})
-
-    # Botón para limpiar la conversación
-    if st.button("Limpiar conversación"):
-        st.session_state.chat_consejo = []
-        st.rerun()
         
         # Guardar la respuesta de la IA en el historial
         st.session_state.chat_consejo.append({"role": "assistant", "content": res})
