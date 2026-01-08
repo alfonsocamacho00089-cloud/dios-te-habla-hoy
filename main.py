@@ -89,7 +89,7 @@ if st.session_state.menu == 'aliento':
 elif st.session_state.menu == 'consejo':
 elif st.session_state.menu == 'consejo':
     st.subheader("📖 Consejo de Dios")
-    st.write("Cuéntale a Dios tus preocupaciones. La IA te responderá como un pastor compasivo y podrás seguir la conversación.")
+    st.write("Cuéntale a Dios tus preocupaciones. La IA te responderá como un pastor compasivo que da consejos solamente biblicos y podrás seguir la conversación.")
 
     # 1. Inicializar el historial de esta conversación si no existe
     if 'chat_consejo' not in st.session_state:
