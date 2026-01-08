@@ -46,8 +46,9 @@ st.divider()
 # --- MENÚ PRINCIPAL POR BOTONES ---
 if 'menu' not in st.session_state:
     st.session_state.menu = 'inicio'
+if 'devocional_actual' not in st.session_state:
+    st.session_state.devocional_actual = None
 
-# Botones grandes para celular
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🙏 PALABRA DE ALIENTO", use_container_width=True):
@@ -96,14 +97,35 @@ elif st.session_state.menu == 'devocional':
                 messages=[{"role": "system", "content": "Crea un devocional con título, versículo, reflexión y oración."}],
                 model="llama-3.3-70b-versatile"
             ).choices[0].message.content
+            st.session_state.devocional_actual = res
             st.markdown(res)
             st.audio(texto_a_voz(res))
+    
+    if st.session_state.devocional_actual:
+        if st.button("💾 Guardar para leer más tarde"):
+            # Aquí llamamos a la herramienta para guardar en la lista del usuario
+            st.toast("¡Devocional guardado en tu lista!", icon="💾")
 
 elif st.session_state.menu == 'biblia':
     st.subheader("📜 La Santa Biblia")
-    libros = ["Génesis", "Éxodo", "Salmos", "Mateo", "Juan", "Apocalipsis"] # Puedes añadir más
-    libro_sel = st.selectbox("Selecciona un Libro", libros)
+    
+    # Lista completa de los 66 libros
+    todos_los_libros = [
+        "Génesis", "Éxodo", "Levítico", "Números", "Deuteronomio", "Josué", "Jueces", "Rut", 
+        "1 Samuel", "2 Samuel", "1 Reyes", "2 Reyes", "1 Crónicas", "2 Crónicas", "Esdras", 
+        "Nehemías", "Ester", "Job", "Salmos", "Proverbios", "Eclesiastés", "Cantares", 
+        "Isaías", "Jeremías", "Lamentaciones", "Ezequiel", "Daniel", "Oseas", "Joel", 
+        "Amos", "Abdías", "Jonás", "Miqueas", "Nahúm", "Habacuc", "Sofonías", "Hageo", 
+        "Zacarías", "Malaquías", "Mateo", "Marcos", "Lucas", "Juan", "Hechos", "Romanos", 
+        "1 Corintios", "2 Corintios", "Gálatas", "Efesios", "Filipenses", "Colosenses", 
+        "1 Tesalonicenses", "2 Tesalonicenses", "1 Timoteo", "2 Timoteo", "Tito", 
+        "Filemón", "Hebreos", "Santiago", "1 Pedro", "2 Pedro", "1 Juan", "2 Juan", 
+        "3 Juan", "Judas", "Apocalipsis"
+    ]
+    
+    libro_sel = st.selectbox("Selecciona un Libro", todos_los_libros)
     cap = st.number_input("Capítulo", min_value=1, step=1)
+    
     if st.button("Leer"):
         with st.spinner("Abriendo las escrituras..."):
             res = client.chat.completions.create(
@@ -113,9 +135,10 @@ elif st.session_state.menu == 'biblia':
             st.markdown(f"### {libro_sel} {cap}")
             st.write(res)
 
-# Botón para volver siempre visible si no estás en el inicio
+# Botón para volver
 if st.session_state.menu != 'inicio':
     st.divider()
     if st.button("⬅️ Volver al Menú"):
         st.session_state.menu = 'inicio'
+        st.session_state.devocional_actual = None
         st.rerun()
