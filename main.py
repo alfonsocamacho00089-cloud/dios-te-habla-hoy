@@ -133,20 +133,27 @@ elif st.session_state.menu == 'mis_guardados':
         for idx, dev in enumerate(reversed(st.session_state.favoritos)):
             with st.expander(f"📖 Mensaje Guardado"):
                 st.markdown(dev)
-
+                
 # SECCIÓN: LA BIBLIA COMPLETA
 elif st.session_state.menu == 'biblia':
     st.subheader("📜 La Santa Biblia (RVR1960)")
     libros = ["Génesis", "Éxodo", "Levítico", "Números", "Deuteronomio", "Josué", "Jueces", "Rut", "1 Samuel", "2 Samuel", "1 Reyes", "2 Reyes", "1 Crónicas", "2 Crónicas", "Esdras", "Nehemías", "Ester", "Job", "Salmos", "Proverbios", "Eclesiastés", "Cantares", "Isaías", "Jeremías", "Lamentaciones", "Ezequiel", "Daniel", "Oseas", "Joel", "Amos", "Abdías", "Jonás", "Miqueas", "Nahúm", "Habacuc", "Sofonías", "Hageo", "Zacarías", "Malaquías", "Mateo", "Marcos", "Lucas", "Juan", "Hechos", "Romanos", "1 Corintios", "2 Corintios", "Gálatas", "Efesios", "Filipenses", "Colosenses", "1 Tesalonicenses", "2 Tesalonicenses", "1 Timoteo", "2 Timoteo", "Tito", "Filemón", "Hebreos", "Santiago", "1 Pedro", "2 Pedro", "1 Juan", "2 Juan", "3 Juan", "Judas", "Apocalipsis"]
+    
     libro_sel = st.selectbox("Selecciona un Libro", libros)
     cap = st.number_input("Capítulo", min_value=1, step=1)
+    
     if st.button("Abrir Biblia"):
-        res = client.chat.completions.create(
-            messages=[{"role": "system", "content": f"Texto de {libro_sel} {cap} Reina Valera 1960."}],
-            model="llama-3.3-70b-versatile"
-        ).choices[0].message.content
-        st.write(res)
-
+        with st.spinner("Cargando escrituras..."):
+            # Aquí añadimos la instrucción de listar los versículos hacia abajo
+            res = client.chat.completions.create(
+                messages=[{"role": "system", "content": f"""Muestra el texto de {libro_sel} {cap} en español Reina Valera 1960. 
+                IMPORTANTE: Escribe cada versículo en una línea nueva, comenzando con su número (ejemplo: 1 En el principio...), para que aparezcan en fila hacia abajo."""}],
+                model="llama-3.3-70b-versatile"
+            ).choices[0].message.content
+            
+            st.markdown(f"### {libro_sel} {cap}")
+            # Usamos un contenedor con borde para que se vea más organizado
+            st.info(res)
 # BOTÓN VOLVER
 if st.session_state.menu != 'inicio':
     if st.button("⬅️ VOLVER AL MENÚ"):
