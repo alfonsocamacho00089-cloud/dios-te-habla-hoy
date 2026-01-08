@@ -7,118 +7,108 @@ import os
 # Configuración de la página
 st.set_page_config(page_title="Dios habla contigo", page_icon="✨")
 
-# Función para convertir texto a voz
-def texto_a_voz(texto, filename="respuesta.mp3"):
+# Función para voz
+def texto_a_voz(texto, filename="temp.mp3"):
     try:
+        if os.path.exists(filename):
+            os.remove(filename)
         tts = gTTS(text=texto, lang='es')
         tts.save(filename)
         return filename
     except:
         return None
 
-# Conexión con Groq
+# Conexión Groq
 try:
     client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 except:
-    st.error("Configura tu GROQ_API_KEY en Secrets.")
+    st.error("Error: Configura la API Key en Secrets.")
     st.stop()
 
-# --- VERSÍCULO DEL DÍA (ESTÁTICO AL INICIO) ---
+# --- TÍTULO Y VERSÍCULO DEL DÍA ---
 st.markdown("<h1 style='text-align: center;'>✨ Dios habla contigo</h1>", unsafe_content_html=True)
 
 @st.cache_data(ttl=86400)
 def obtener_versiculo_dia():
-    try:
-        res = client.chat.completions.create(
-            messages=[{"role": "system", "content": "Da un versículo bíblico corto de esperanza para hoy con su cita. Solo el texto y la cita."}],
-            model="llama-3.3-70b-versatile",
-        )
-        return res.choices[0].message.content
-    except:
-        return "Todo lo puedo en Cristo que me fortalece. - Filipenses 4:13"
+    res = client.chat.completions.create(
+        messages=[{"role": "system", "content": "Da un versículo bíblico corto y su cita para hoy."}],
+        model="llama-3.3-70b-versatile"
+    )
+    return res.choices[0].message.content
 
 st.info(f"🌟 **VERSÍCULO DEL DÍA**\n\n{obtener_versiculo_dia()}")
 
 st.markdown("---")
 
-# --- MENÚ DE NAVEGACIÓN POR BOTONES ---
-if 'menu' not in st.session_state:
-    st.session_state.menu = 'inicio'
+# --- MENÚ PRINCIPAL ---
+if 'seccion' not in st.session_state:
+    st.session_state.seccion = 'inicio'
 
-# Diseño de botones en cuadrícula
+# Botones de navegación
 col1, col2 = st.columns(2)
 with col1:
     if st.button("🙏 PALABRA DE ALIENTO", use_container_width=True):
-        st.session_state.menu = 'aliento'
+        st.session_state.seccion = 'aliento'
     if st.button("☀️ DEVOCIONAL DIARIO", use_container_width=True):
-        st.session_state.menu = 'devocional'
+        st.session_state.seccion = 'devocional'
 with col2:
-    if st.button("🙏 CONSEJO DE DIOS", use_container_width=True):
-        st.session_state.menu = 'consejo'
-    if st.button("📜 LEER LA BIBLIA", use_container_width=True):
-        st.session_state.menu = 'biblia'
+    if st.button("📖 CONSEJO DE DIOS", use_container_width=True):
+        st.session_state.seccion = 'consejo'
+    if st.button("📜 LA SANTA BIBLIA", use_container_width=True):
+        st.session_state.seccion = 'biblia'
 
 st.markdown("---")
 
 # --- LÓGICA DE SECCIONES ---
 
-if st.session_state.menu == 'aliento':
-    st.subheader("📖 Palabra de Aliento")
+if st.session_state.seccion == 'aliento':
+    st.subheader("🙏 Palabra de Aliento")
     sentir = st.text_input("¿Cómo te sientes hoy?")
     if st.button("Recibir Mensaje"):
-        with st.spinner("Escuchando..."):
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Eres Jesus de Nazareth. Da un versículo y aliento corto."},
-                          {"role": "user", "content": sentir}],
-                model="llama-3.3-70b-versatile"
-            ).choices[0].message.content
-            st.success(res)
-            audio = texto_a_voz(res, "aliento.mp3")
-            if audio: st.audio(audio)
+        res = client.chat.completions.create(
+            messages=[{"role": "system", "content": "Eres Jesus de Nazareth. Da un versículo y aliento corto."},
+                      {"role": "user", "content": sentir}],
+            model="llama-3.3-70b-versatile"
+        ).choices[0].message.content
+        st.success(res)
+        st.audio(texto_a_voz(res))
 
-elif st.session_state.menu == 'consejo':
-    st.subheader("🙏 Consejo de Dios")
-    problema = st.text_area("Cuéntale a Dios tu situación:")
+elif st.session_state.seccion == 'consejo':
+    st.subheader("📖 Consejo de Dios")
+    problema = st.text_area("¿Qué te preocupa?")
     if st.button("Pedir Sabiduría"):
-        with st.spinner("Buscando en la Palabra..."):
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Eres un pastor compasivo. Da un consejo bíblico detallado."},
-                          {"role": "user", "content": problema}],
-                model="llama-3.3-70b-versatile"
-            ).choices[0].message.content
-            st.success(res)
-            audio = texto_a_voz(res, "consejo.mp3")
-            if audio: st.audio(audio)
+        res = client.chat.completions.create(
+            messages=[{"role": "system", "content": "Eres un pastor compasivo. Da un consejo bíblico."},
+                      {"role": "user", "content": problema}],
+            model="llama-3.3-70b-versatile"
+        ).choices[0].message.content
+        st.success(res)
+        st.audio(texto_a_voz(res))
 
-elif st.session_state.menu == 'devocional':
+elif st.session_state.seccion == 'devocional':
     st.subheader("☀️ Devocional Diario")
     if st.button("Generar Devocional"):
-        with st.spinner("Preparando..."):
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Crea un devocional con título, versículo, reflexión y oración."}],
-                model="llama-3.3-70b-versatile"
-            ).choices[0].message.content
-            st.write(res)
-            audio = texto_a_voz(res, "devocional.mp3")
-            if audio: st.audio(audio)
+        res = client.chat.completions.create(
+            messages=[{"role": "system", "content": "Crea un devocional con título, versículo, reflexión y oración."}],
+            model="llama-3.3-70b-versatile"
+        ).choices[0].message.content
+        st.markdown(res)
+        st.audio(texto_a_voz(res))
 
-elif st.session_state.menu == 'biblia':
+elif st.session_state.seccion == 'biblia':
     st.subheader("📜 La Santa Biblia")
-    # API Directa para leer la Biblia
-    libro = st.selectbox("Selecciona un Libro", ["Genesis", "Exodo", "Levitico", "Numeros", "Deuteronomio", "Mateo", "Marcos", "Lucas", "Juan", "Salmos"])
-    capitulo = st.number_input("Capítulo", min_value=1, step=1)
-    
-    if st.button("Abrir Biblia"):
-        # Usamos la IA para que nos traiga el capítulo rápido y en español
+    libro = st.selectbox("Selecciona un Libro", ["Génesis", "Éxodo", "Levítico", "Números", "Deuteronomio", "Mateo", "Marcos", "Lucas", "Juan", "Salmos", "Apocalipsis"])
+    cap = st.number_input("Capítulo", min_value=1, step=1)
+    if st.button("Leer"):
         with st.spinner("Abriendo las escrituras..."):
             res = client.chat.completions.create(
-                messages=[{"role": "system", "content": f"Muestra el texto completo del libro de {libro} capítulo {capitulo}. Versión Reina Valera 1960."}],
+                messages=[{"role": "system", "content": f"Muestra el texto completo de {libro} capítulo {cap} en español Reina Valera 1960."}],
                 model="llama-3.3-70b-versatile"
             ).choices[0].message.content
-            st.markdown(f"### {libro} {capitulo}")
+            st.markdown(f"### {libro} {cap}")
             st.write(res)
 
-if st.session_state.menu != 'inicio':
+if st.session_state.seccion != 'inicio':
     if st.button("⬅️ Volver al Menú"):
-        st.session_state.menu = 'inicio'
+        st.session_state.seccion = 'inicio'
         st.rerun()
