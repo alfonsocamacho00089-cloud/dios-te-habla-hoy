@@ -88,17 +88,55 @@ if st.session_state.menu == 'aliento':
 # SECCIÓN: CONSEJO
 elif st.session_state.menu == 'consejo':
     st.subheader("📖 Consejo de Dios")
-    problema = st.text_area("¿Qué situación estás pasando?")
-    if st.button("Pedir Sabiduría"):
-        with st.spinner("Buscando en la Palabra..."):
-            res = client.chat.completions.create(
-                messages=[{"role": "system", "content": "Eres un pastor compasivo. Da un consejo bíblico detallado."},
-                          {"role": "user", "content": problema}],
-                model="llama-3.3-70b-versatile"
-            ).choices[0].message.content
-            st.success(res)
-            st.audio(texto_a_voz(res))
+    st.write("Cuéntale a Dios tus preocupaciones. La IA te responderá como un pastor compasivo y podrás seguir conversando con ella.")
 
+    # 1. Inicializar el historial de mensajes si no existe
+    if 'chat_consejo' not in st.session_state:
+        st.session_state.chat_consejo = []
+
+    # 2. Mostrar los mensajes que ya se han escrito (el historial)
+    for mensaje in st.session_state.chat_consejo:
+        with st.chat_message(mensaje["role"]):
+            st.markdown(mensaje["content"])
+
+    # 3. Barra para escribir (Aquí es donde le pides apoyo y respondes)
+    prompt = st.chat_input("Escribe aquí lo que hay en tu corazón...")
+
+    if prompt:
+        # Mostrar tu mensaje en pantalla
+        with st.chat_message("user"):
+            st.markdown(prompt)
+        
+        # Guardar tu mensaje en la memoria
+        st.session_state.chat_consejo.append({"role": "user", "content": prompt})
+
+        # Generar la respuesta de la IA
+        with st.chat_message("assistant"):
+            with st.spinner("Escuchando y buscando en la Palabra..."):
+                # Se envía TODO el historial para que la IA no olvide de qué están hablando
+                mensajes_para_ia = [
+                    {"role": "system", "content": "Eres un pastor cristiano lleno de amor y sabiduría. Tu meta es dar consejo bíblico y apoyo emocional. Escucha con paciencia, usa versículos y permite que el usuario se desahogue."}
+                ] + st.session_state.chat_consejo
+                
+                res = client.chat.completions.create(
+                    messages=mensajes_para_ia,
+                    model="llama-3.3-70b-versatile"
+                ).choices[0].message.content
+                
+                st.markdown(res)
+                # Generar el audio de la respuesta
+                audio_file = texto_a_voz(res)
+                if audio_file:
+                    st.audio(audio_file)
+        
+        # Guardar la respuesta de la IA en la memoria
+        st.session_state.chat_consejo.append({"role": "assistant", "content": res})
+
+    # Botón opcional para borrar la charla y empezar de nuevo
+    if st.session_state.chat_consejo:
+        if st.button("Borrar conversación y empezar de cero"):
+            st.session_state.chat_consejo = []
+            st.rerun()
 # SECCIÓN: DEVOCIONAL DIARIO
 elif st.session_state.menu == 'devocional':
     st.subheader("☀️ Devocional Diario")
@@ -119,15 +157,34 @@ elif st.session_state.menu == 'devocional':
                 st.toast("¡Guardado!", icon="✅")
 
 # SECCIÓN: TUS DEVOCIONALES GUARDADOS
-elif st.session_state.menu == 'mis_guardados':
-    st.subheader("📂 Tus Devocionales Guardados")
-    if not st.session_state.favoritos:
-        st.info("Aún no tienes mensajes guardados.")
-    else:
-        for idx, dev in enumerate(reversed(st.session_state.favoritos)):
-            with st.expander(f"📖 Mensaje Guardado #{len(st.session_state.favoritos) - idx}"):
-                st.markdown(dev)
-
+elif st.session_state.menu == 'devocional':
+    st.subheader("☀️ Devocional Diario")
+    if st.button("Generar Nuevo Devocional"):
+        with st.spinner("Preparando alimento basado en la sana doctrina..."):
+            res = client.chat.completions.create(
+                messages=[{
+                    "role": "system", 
+                    "content": """Eres un mentor bíblico ortodoxo. Crea un devocional con la siguiente estructura estricta:
+                    1. Título inspirador.
+                    2. Versículo clave (Reina Valera 1960).
+                    3. Enseñanza Bíblica: Basada estrictamente en las palabras de Jesús o las epístolas de los apóstoles (priorizando a Pablo). Debe ser una explicación profunda de la sana doctrina.
+                    4. Reflexión para nuestros días: Un párrafo muy corto que conecte la enseñanza con el mundo actual.
+                    5. Aplicación para nuestra vida: Pasos prácticos para vivir esa palabra hoy.
+                    6. Oración breve.
+                    
+                    Importante: No uses la palabra 'Reflexión' para la aplicación. Usa exactamente los títulos mencionados."""
+                }],
+                model="llama-3.3-70b-versatile"
+            ).choices[0].message.content
+            st.session_state.temp_dev = res
+            st.markdown(res)
+            st.audio(texto_a_voz(res))
+    
+    if st.session_state.temp_dev:
+        if st.button("💾 Guardar en 'Tus Devocionales'"):
+            if st.session_state.temp_dev not in st.session_state.favoritos:
+                st.session_state.favoritos.append(st.session_state.temp_dev)
+                st.toast("¡Guardado!", icon="✅")
 # SECCIÓN: LA BIBLIA COMPLETA
 elif st.session_state.menu == 'biblia':
     st.subheader("📜 La Santa Biblia")
